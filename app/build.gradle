@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -39,6 +42,8 @@ dependencies {
     compile 'com.sdsmdg.tastytoast:tastytoast:0.1.0'
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
+    compile 'com.klinkerapps:sliding-activity:1.4.4'
 
+    compile 'com.android.support:design:25.0.1'
 
 }

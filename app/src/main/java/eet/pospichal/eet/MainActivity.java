@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -21,7 +22,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.desai.vatsal.mydynamictoast.MyDynamicToast;
 import com.google.zxing.client.android.CaptureActivity;
-import com.google.zxing.common.StringUtils;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.sdsmdg.tastytoast.TastyToast;
 import java.io.IOException;
@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
+import eet.pospichal.eet.database.realm;
 import openeet.lite.EetRegisterRequest;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -67,11 +69,16 @@ public class MainActivity extends Activity {
     private boolean vynasob_posledni = false;
     private int vynasob_kolika = 1;
 
+
     //endregion
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        realm rel = realm.getInstance();
+        rel.InitConnection();
 
         ucty = new ArrayList<UctenkaType>();
 
@@ -107,6 +114,7 @@ public class MainActivity extends Activity {
         Button rem_all = (Button)findViewById(R.id.btn_rem_all);
         Button count = (Button)findViewById(R.id.btn_multiply);
         Button send_eet = (Button)findViewById(R.id.sendEET);
+        Button open_list = (Button)findViewById(R.id.btn_open_product_list) ;
 
         one.setOnClickListener(listener);
         two.setOnClickListener(listener);
@@ -125,6 +133,7 @@ public class MainActivity extends Activity {
         rem_all.setOnClickListener(rem_all_listener);
         count.setOnClickListener(count_listener);
         send_eet.setOnClickListener(eet_listener);
+        open_list.setOnClickListener(open_list_list);
 
         //endregion
 
@@ -359,6 +368,15 @@ public class MainActivity extends Activity {
     //endregion
 
     //region onclicklisteners
+
+    public View.OnClickListener open_list_list = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
+            intent.putExtra("like_count", 10);
+            startActivity(intent);
+        }
+    };
 
     public View.OnClickListener eet_listener = new View.OnClickListener() {
         @Override
