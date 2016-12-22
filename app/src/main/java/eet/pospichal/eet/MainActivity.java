@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -23,7 +22,10 @@ import com.afollestad.materialdialogs.Theme;
 import com.desai.vatsal.mydynamictoast.MyDynamicToast;
 import com.google.zxing.client.android.CaptureActivity;
 import com.mindorks.placeholderview.PlaceHolderView;
+import com.orhanobut.logger.Logger;
 import com.sdsmdg.tastytoast.TastyToast;
+import com.siimkinks.sqlitemagic.SqliteMagic;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,8 +36,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import eet.pospichal.eet.database.realm;
+import eet.pospichal.eet.model.Cena;
+import eet.pospichal.eet.model.Dan;
+import eet.pospichal.eet.model.Product;
 import openeet.lite.EetRegisterRequest;
+import openeet.lite.Main;
+
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static openeet.lite.EetRegisterRequest.loadStream;
@@ -70,15 +76,17 @@ public class MainActivity extends Activity {
     private int vynasob_kolika = 1;
 
 
+    private boolean zadani_inter = false;
+
     //endregion
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        CommunicationLayer.getInstance().RegisterMainActivity(this);
 
-        realm rel = realm.getInstance();
-        rel.InitConnection();
+        SqliteMagic.init(getApplication());
 
         ucty = new ArrayList<UctenkaType>();
 
@@ -115,6 +123,8 @@ public class MainActivity extends Activity {
         Button count = (Button)findViewById(R.id.btn_multiply);
         Button send_eet = (Button)findViewById(R.id.sendEET);
         Button open_list = (Button)findViewById(R.id.btn_open_product_list) ;
+        Button inter_zad = (Button)findViewById(R.id.btn_inter_id);
+        Button vypocist_dan = (Button)findViewById(R.id.btn_show_dan);
 
         one.setOnClickListener(listener);
         two.setOnClickListener(listener);
@@ -134,6 +144,8 @@ public class MainActivity extends Activity {
         count.setOnClickListener(count_listener);
         send_eet.setOnClickListener(eet_listener);
         open_list.setOnClickListener(open_list_list);
+        inter_zad.setOnClickListener(inter_zad_listener);
+        vypocist_dan.setOnClickListener(show_dan_listener);
 
         //endregion
 
@@ -257,17 +269,12 @@ public class MainActivity extends Activity {
     {
         //TODO:// ZKONTROLOVAT MINUSOVANI KORUN POKUD JE POD NULOU S HALEREMA
 
-        Log.e("STAV_KORUNY", celk_kor+"");
-        Log.e("STAV_HALERE", celk_hal+"");
+
 
 
         celk_kor -= ucty.get(index).kor;
         celk_hal -= ucty.get(index).hal;
 
-        Log.e("KORUNY", ucty.get(index).kor+"");
-        Log.e("HALERE", ucty.get(index).hal+"");
-
-        Log.e("STAV_KORUNY", celk_kor+"");
 
         if (celk_hal < 0)
         {
@@ -296,13 +303,10 @@ public class MainActivity extends Activity {
             if (halere >= 100)
             {
                 double result = (double)halere / (double) 100;
-                Log.e("INFO", result+"");
+
                 String result_ready = String.valueOf(result);
                 String koruny_add = result_ready.split("\\.")[0];
                 String halere_add = result_ready.split("\\.")[1];
-
-                Log.e("KORUNY", koruny_add+"");
-                Log.e("HALERE", halere_add+"");
 
 
                 koruny += Integer.parseInt(koruny_add);
@@ -310,7 +314,7 @@ public class MainActivity extends Activity {
             }
 
 
-            UctenkaType new_ucet = new UctenkaType(MainActivity.this, mGalleryView,this, ucty.size(), Celkem(), koruny, halere);
+            UctenkaType new_ucet = new UctenkaType(MainActivity.this, mGalleryView,this, ucty.size(), Celkem(), koruny, halere, "Produkt *" + vynasob_kolika);
             ucty.add(new_ucet);
 
             celk_kor += koruny;
@@ -333,12 +337,16 @@ public class MainActivity extends Activity {
             TextView monitor = (TextView)findViewById(R.id.txt_castka);
             monitor.setText(Celkem());
 
+            vynasob_posledni = false;
+            vynasob_kolika = 1;
+            Button btn = (Button)findViewById(R.id.btn_multiply);
+            btn.setText("Množství");
 
             mGalleryView.addView(new_ucet);
         }
         else
         {
-            UctenkaType new_ucet = new UctenkaType(MainActivity.this, mGalleryView,this, ucty.size(), Celkem(), koruny, halere);
+            UctenkaType new_ucet = new UctenkaType(MainActivity.this, mGalleryView,this, ucty.size(), Celkem(), koruny, halere, "Produkt");
             ucty.add(new_ucet);
 
             celk_kor += koruny;
@@ -361,13 +369,165 @@ public class MainActivity extends Activity {
             TextView monitor = (TextView)findViewById(R.id.txt_castka);
             monitor.setText(Celkem());
 
+            vynasob_posledni = false;
+            vynasob_kolika = 1;
+            Button btn = (Button)findViewById(R.id.btn_multiply);
+            btn.setText("Množství");
 
             mGalleryView.addView(new_ucet);
         }
     }
+
+    public void AddItemToUcet(int koruny, int halere, String jmeno)
+    {
+        if (vynasob_posledni) {
+            koruny *= vynasob_kolika;
+            halere *= vynasob_kolika;
+
+            if (halere >= 100) {
+                double result = (double) halere / (double) 100;
+                String result_ready = String.valueOf(result);
+                String koruny_add = result_ready.split("\\.")[0];
+                String halere_add = result_ready.split("\\.")[1];
+
+
+
+                koruny += Integer.parseInt(koruny_add);
+                halere = Integer.parseInt(halere_add);
+            }
+
+
+            UctenkaType new_ucet = new UctenkaType(MainActivity.this, mGalleryView, this, ucty.size(), koruny + "." + halere + " Czk", koruny, halere, jmeno +" *"+vynasob_kolika);
+            ucty.add(new_ucet);
+
+            celk_kor += koruny;
+            celk_hal += halere;
+
+            if (celk_hal >= 100) {
+                celk_kor += 1;
+                celk_hal -= 100;
+            }
+
+            TextView celkem = (TextView) findViewById(R.id.celkova_castka);
+            celkem.setText("" + celk_kor + "." + celk_hal + " Kč");
+
+            String celk = Celkem();
+
+            halere = 0;
+            koruny = 0;
+            castka = CastMeny.Koruny;
+            TextView monitor = (TextView) findViewById(R.id.txt_castka);
+            monitor.setText(Celkem());
+
+            if (mGalleryView != null)
+            {
+                vynasob_posledni = false;
+                vynasob_kolika = 1;
+                Button btn = (Button)findViewById(R.id.btn_multiply);
+                btn.setText("Množství");
+                mGalleryView.addView(new_ucet);
+            }
+            else
+            {
+                Logger.e("FUCK CRASH");
+            }
+        }
+        else
+        {
+            UctenkaType new_ucet = new UctenkaType(MainActivity.this, mGalleryView,this, ucty.size(), koruny + "." + halere+" Kč", koruny, halere, jmeno);
+            ucty.add(new_ucet);
+
+            celk_kor += koruny;
+            celk_hal += halere;
+
+            if (celk_hal >= 100)
+            {
+                celk_kor += 1;
+                celk_hal -= 100;
+            }
+
+            TextView celkem = (TextView) findViewById(R.id.celkova_castka);
+            celkem.setText(""+celk_kor+"."+celk_hal+" Kč");
+
+            String celk = Celkem();
+
+            this.halere = 0;
+            this.koruny = 0;
+            castka = CastMeny.Koruny;
+            TextView monitor = (TextView)findViewById(R.id.txt_castka);
+            monitor.setText(Celkem());
+
+
+
+            if (mGalleryView != null)
+            {
+                vynasob_posledni = false;
+                vynasob_kolika = 1;
+                Button btn = (Button)findViewById(R.id.btn_multiply);
+                btn.setText("Množství");
+                mGalleryView.addView(new_ucet);
+            }
+            else
+            {
+                Logger.e("FUCK CRASH");
+                mGalleryView = (PlaceHolderView) findViewById(R.id.galleryView);
+                mGalleryView.addView(new_ucet);
+            }
+        }
+    }
+
     //endregion
 
     //region onclicklisteners
+
+    public View.OnClickListener show_dan_listener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Cena cena = new Cena(celk_kor, celk_hal, Dan.Typ.dvacet_jedna);
+            cena = ProductHelper.getInstance().VypoctiDanZProduktu(cena);
+            new MaterialDialog.Builder(MainActivity.this)
+                    .title("Výpočet daně")
+                    .content("Daň z této objednávky je: " + cena.dan_koruny + "." + cena.dan_halere + " Kč")
+                    .theme(Theme.DARK)
+                    .buttonsGravity(GravityEnum.CENTER)
+                    .cancelable(true)
+                    .show();
+        }
+    };
+
+    public View.OnClickListener inter_zad_listener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (koruny != 0)
+            {
+                Product product = ProductHelper.getInstance().GetLocalProduct(koruny);
+                if (product != null)
+                {
+                    TastyToast.makeText(MainActivity.this, "Přidávám produkt "+product.barcode, TastyToast.LENGTH_SHORT, TastyToast.DEFAULT);
+                    if (product.jmeno_produktu.length() > 10)
+                    {
+                        AddItemToUcet(product.cena_koruny, product.cena_halere, product.jmeno_produktu.substring(0,10)+"...");
+                    }
+                    else
+                    {
+                        AddItemToUcet(product.cena_koruny, product.cena_halere, product.jmeno_produktu);
+                    }
+                    vynasob_posledni = false;
+                    vynasob_kolika = 1;
+                    Button btn = (Button)findViewById(R.id.btn_multiply);
+                    btn.setText("Množství");
+                    halere = 0;
+                    koruny = 0;
+                    castka = CastMeny.Koruny;
+                    TextView monitor = (TextView)findViewById(R.id.txt_castka);
+                    monitor.setText(Celkem());
+                }
+                else {
+                    TastyToast.makeText(MainActivity.this, "Produkt nenalezen, můžete ho vytvořit...", TastyToast.LENGTH_LONG, TastyToast.WARNING);
+                }
+            }
+        }
+    };
 
     public View.OnClickListener open_list_list = new View.OnClickListener() {
         @Override
@@ -424,49 +584,67 @@ public class MainActivity extends Activity {
         @Override
         public void onClick(View view) {
 
-
-            new MaterialDialog.Builder(MainActivity.this)
-                    .title("Potvrzení")
-                    .content("Jste si jistý, že chcete zrušit tuto objednávku?")
-                    .positiveText("ANO")
-                    .negativeText("ne")
-                    .theme(Theme.DARK)
-                    .positiveColorRes(R.color.colorPrimary)
-                    .negativeColorRes(R.color.colorError)
-                    .buttonsGravity(GravityEnum.CENTER)
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            int count = ucty.size();
-                            for (int i = 0; i < count; i++)
-                            {
-                                RemoveItemFromUcet(0);
-                                halere = 0;
-                                koruny = 0;
-                                castka = CastMeny.Koruny;
-                                TextView monitor = (TextView)findViewById(R.id.txt_castka);
-                                monitor.setText(Celkem());
+            if (!ucty.isEmpty())
+            {
+                new MaterialDialog.Builder(MainActivity.this)
+                        .title("Potvrzení")
+                        .content("Jste si jistý, že chcete zrušit tuto objednávku?")
+                        .positiveText("ANO")
+                        .negativeText("ne")
+                        .theme(Theme.DARK)
+                        .positiveColorRes(R.color.colorPrimary)
+                        .negativeColorRes(R.color.colorError)
+                        .buttonsGravity(GravityEnum.CENTER)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                int count = ucty.size();
+                                for (int i = 0; i < count; i++)
+                                {
+                                    RemoveItemFromUcet(0);
+                                    halere = 0;
+                                    koruny = 0;
+                                    castka = CastMeny.Koruny;
+                                    TextView monitor = (TextView)findViewById(R.id.txt_castka);
+                                    monitor.setText(Celkem());
+                                }
+                                vynasob_posledni = false;
+                                vynasob_kolika = 1;
+                                Button btn = (Button)findViewById(R.id.btn_multiply);
+                                btn.setText("Množství");
+                                TastyToast.makeText(getApplicationContext(), "Objednávka zrušena!", TastyToast.LENGTH_SHORT, TastyToast.INFO);
                             }
-                            vynasob_posledni = false;
-                            vynasob_kolika = 1;
-                            Button btn = (Button)findViewById(R.id.btn_multiply);
-                            btn.setText("Množství");
-                            TastyToast.makeText(getApplicationContext(), "Objednávka zrušena!", TastyToast.LENGTH_SHORT, TastyToast.INFO);
-                        }
-                    })
-                    .onNegative(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            TastyToast.makeText(getApplicationContext(), "Objednávka NEBYLA zrušena!", TastyToast.LENGTH_SHORT, TastyToast.INFO);
-                        }
-                    })
-                    .show();
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                TastyToast.makeText(getApplicationContext(), "Objednávka NEBYLA zrušena!", TastyToast.LENGTH_SHORT, TastyToast.INFO);
+                            }
+                        })
+                        .show();
+            }
+            else
+            {
+                TastyToast.makeText(getApplicationContext(), "Nejde zrušit prázdnou objednávku!", TastyToast.LENGTH_SHORT, TastyToast.ERROR);
+            }
+
+
         }
     };
 
     public View.OnClickListener enter_listener = new View.OnClickListener() {
         @Override
-        public void onClick(View view) {
+        public void onClick(final View view) {
+
+            view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.error_color));
+
+            new android.os.Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.cardview_dark_background));
+                        }
+                    },
+                    100);
             //http://lorempixel.com/400/200/
             mGalleryView = (PlaceHolderView)findViewById(R.id.galleryView);
             /*
@@ -493,11 +671,24 @@ public class MainActivity extends Activity {
 
     public View.OnClickListener listener = new View.OnClickListener() {
         @Override
-        public void onClick(View view) {
+        public void onClick(final View view) {
+
+            view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.sucess));
+
+            new android.os.Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.cardview_dark_background));
+                        }
+                    },
+                    100);
+
+
             Button clicked = (Button)view;
+            /*
             TextView status = (TextView)findViewById(R.id.status);
             status.setText(clicked.getText());
-
+            */
             if (castka == CastMeny.Koruny)
             {
                 IncrementKoruny(Integer.parseInt(clicked.getText()+""));
@@ -514,7 +705,19 @@ public class MainActivity extends Activity {
 
     public View.OnClickListener dot_listener = new View.OnClickListener() {
         @Override
-        public void onClick(View view) {
+        public void onClick(final View view) {
+
+            view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.error_color));
+
+            new android.os.Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.cardview_dark_background));
+                        }
+                    },
+                    100);
+
+
             if (castka == CastMeny.Koruny)
             {
                 castka = CastMeny.Halere;

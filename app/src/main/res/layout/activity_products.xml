@@ -6,11 +6,86 @@
     android:layout_height="wrap_content"
     android:padding="10dp">
 
-    <com.mindorks.placeholderview.PlaceHolderView
-        android:id="@+id/mrdkaView"
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"/>
+        android:layout_height="match_parent"
+        android:weightSum="6">
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.mancj.materialsearchbar.MaterialSearchBar
+                    app:speechMode="false"
+                    app:hint="Jméno produktu"
+                    app:maxSuggestionsCount="10"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/searchBar" />
+
+                <com.mindorks.placeholderview.PlaceHolderView
+                    android:id="@+id/mrdkaView"
+                    android:padding="20dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
+
+
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5">
+
+            <Button
+                android:text="Přidat zboží"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_add_produkt"
+                android:elevation="10dp" />
+
+            <android.support.v4.widget.Space
+                android:layout_width="match_parent"
+                android:layout_height="7dp" />
+
+            <TextView
+                android:text="Kategorie produktů:"
+                android:textSize="17dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <android.support.v4.widget.Space
+                android:layout_width="match_parent"
+                android:layout_height="7dp" />
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@color/cardview_dark_background" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
 
 
 </LinearLayout>

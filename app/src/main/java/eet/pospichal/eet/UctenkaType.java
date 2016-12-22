@@ -29,12 +29,16 @@ public class UctenkaType {
     @View(R.id.priceView)
     private TextView tag;
 
+    @View(R.id.productView)
+    private TextView productName;
+
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
 
     private MainActivity activity;
 
     public String pricetag;
+    public String productname;
 
     public int kor;
     public int hal;
@@ -49,9 +53,24 @@ public class UctenkaType {
         hal = halere;
     }
 
+    public UctenkaType(Context context, PlaceHolderView placeHolderView, MainActivity _act, int ind, String price_tag, int koruny, int halere, String product_name) {
+        mContext = context;
+        mPlaceHolderView = placeHolderView;
+        pricetag = price_tag;
+        activity = _act;
+        index = ind;
+        kor = koruny;
+        hal = halere;
+        productname=product_name;
+    }
+
     @Resolve
     private void onResolved() {
         tag.setText(pricetag);
+        if (productname != null)
+        {
+            productName.setText(productname);
+        }
     }
 
     @LongClick(R.id.card)

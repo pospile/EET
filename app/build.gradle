@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.siimkinks.sqlitemagic'
 
 android {
     compileSdkVersion 25
@@ -38,12 +39,17 @@ dependencies {
     compile files('libs/eet7.jar')
     testCompile 'junit:junit:4.12'
     compile 'com.tarun0.zxing-standalone:zxing-standalone:1.0.0'
-    compile 'com.github.vatsaldesai92:MyDynamicToastLibrary:+'
+    compile 'com.github.vatsaldesai92:MyDynamicToastLibrary:1.0.1'
     compile 'com.sdsmdg.tastytoast:tastytoast:0.1.0'
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
     compile 'com.klinkerapps:sliding-activity:1.4.4'
 
     compile 'com.android.support:design:25.0.1'
+
+
+    compile 'com.github.mancj:MaterialSearchBar:+'
+
+    compile 'com.orhanobut:logger:1.15'
 
 }

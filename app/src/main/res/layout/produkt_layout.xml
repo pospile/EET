@@ -12,28 +12,52 @@
     <android.support.v7.widget.CardView
         android:id="@+id/card"
         app:cardBackgroundColor="@color/cardview_light_background"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        app:cardCornerRadius="2dp"
+
+        android:layout_width="210dp"
+        android:layout_height="210dp"
+        app:cardCornerRadius="4dp"
         app:cardElevation="6dp">
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:weightSum="10">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/productView"
+                android:paddingRight="10dp"
+                android:textColor="@color/cardview_dark_background"
+                android:textStyle="bold"
                 android:layout_weight="10"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Položka "
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Položka která je fakt extra dlouhá"
                 android:textSize="20dp"
                 android:textAlignment="center"
-                android:gravity="center" />
+                android:gravity="bottom" />
+            <TextView
+                android:id="@+id/productPrice"
+                android:layout_weight="10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="25.99 Kč"
+                android:textSize="20dp"
+                android:textAlignment="center"
+                android:gravity="top" />
+
+
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/productAdded"
+            android:layout_weight="10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="20dp"
+            android:textAlignment="textStart"
+            android:gravity="bottom" />
 
 
     </android.support.v7.widget.CardView>

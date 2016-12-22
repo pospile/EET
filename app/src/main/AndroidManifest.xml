@@ -19,6 +19,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
+            android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -31,7 +32,12 @@
             android:name=".ProductsActivity"
             android:excludeFromRecents="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.Sliding.DayNight"/>
+            android:theme="@style/Theme.Sliding.DayNight" />
+        <activity
+            android:name=".AddProduktActivity"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Sliding.DayNight" />
     </application>
 
 </manifest>
