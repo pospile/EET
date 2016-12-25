@@ -60,49 +60,47 @@
                 </android.support.v7.widget.CardView>
                 
                 <android.support.v4.widget.Space
+                    android:id="@+id/card_suggestion_space"
                     android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:visibility="gone"/>
+                    android:layout_height="50dp"
+                    android:visibility="visible"/>
                 
                 <android.support.v7.widget.CardView
+                    android:id="@+id/card_suggestion"
                     android:layout_marginTop="5dp"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:weightSum="3">
+                        android:weightSum="2">
 
                         <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_marginStart="5dp"
-                            android:text="Předvolba pro produkt: "
-                            android:textSize="20dp"
-                            android:gravity="center_vertical"/>
-
-                        <TextView
+                            android:id="@+id/product_name_sug"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
                             android:textAlignment="textStart"
-                            android:textSize="18dp"
-                            android:textStyle="bold"
-                            android:text="Gambrinus 12 pack"/>
+                            android:paddingLeft="15dp"
+                            android:textSize="25dp"
+                            android:textStyle="normal"
+                            android:text="Kafíčko bílé"/>
 
                         <TextView
+                            android:id="@+id/product_price_sug"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center"
                             android:layout_gravity="right"
-                            android:textSize="22dp"
+                            android:paddingRight="15dp"
+                            android:textSize="28dp"
                             android:textStyle="bold"
+                            android:textAlignment="textEnd"
                             android:text="255.99 Kč"/>
 
                     </LinearLayout>

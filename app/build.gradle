@@ -52,4 +52,14 @@ dependencies {
 
     compile 'com.orhanobut:logger:1.15'
 
+
+
+    //THIS SECTION IS FOR NEW BARCODE SCANNER IMPLEMENTATION
+    compile files('libs/scandit.jar')
+
+
+
+
+
+
 }

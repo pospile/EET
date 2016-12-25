@@ -80,6 +80,7 @@ public class ProduktType {
         Delete.from(ProductTable.PRODUCT).where(ProductTable.PRODUCT.JMENO_PRODUKTU.is(prod)).execute();
         //activity.RemoveItemFromUcet(index);
         mPlaceHolderView.removeView(this);
+        //CommunicationLayer.getInstance().GetLastRegisteredProdActivity().RefreshCategoryList();
     }
     @Click(R.id.card)
     private void OnClick() {
@@ -92,7 +93,7 @@ public class ProduktType {
         status.setText("Přidáno");
         card.setCardBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.sucess));
         CommunicationLayer.getInstance().GetMainActivity().AddItemToUcet(koruny, halere, ShortenName(10));
-        //CommunicationLayer.getInstance().UpdateProduct(Select.from(ProductTable.PRODUCT).where(ProductTable.PRODUCT.JMENO_PRODUKTU.is(prod)).execute().get(0));
+        //CommunicationLayer.getInstance().UpdateProduct(Select.from(ProductTable.PRODUCT).where(ProductTable.PRODUCT.JMENO_PRODUKTU.is(jmeno)).execute().get(0));
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {

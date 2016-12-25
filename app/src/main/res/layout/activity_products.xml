@@ -65,6 +65,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="7dp" />
 
+            <Button
+                android:text="Přidat kategorii"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_add_cat"
+                android:elevation="10dp" />
+
+            <android.support.v4.widget.Space
+                android:layout_width="match_parent"
+                android:layout_height="7dp" />
+
             <TextView
                 android:text="Kategorie produktů:"
                 android:textSize="17dp"
@@ -79,6 +90,12 @@
                 android:layout_width="fill_parent"
                 android:layout_height="1dp"
                 android:background="@color/cardview_dark_background" />
+
+            <com.mindorks.placeholderview.PlaceHolderView
+                android:id="@+id/categoryView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"/>
 
         </LinearLayout>
 

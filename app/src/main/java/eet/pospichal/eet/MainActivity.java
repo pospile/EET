@@ -8,11 +8,13 @@ import android.graphics.Color;
 import android.os.StrictMode;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Space;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -24,6 +26,8 @@ import com.google.zxing.client.android.CaptureActivity;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.orhanobut.logger.Logger;
 import com.sdsmdg.tastytoast.TastyToast;
+import com.siimkinks.sqlitemagic.ProductTable;
+import com.siimkinks.sqlitemagic.Select;
 import com.siimkinks.sqlitemagic.SqliteMagic;
 
 import java.io.IOException;
@@ -125,6 +129,7 @@ public class MainActivity extends Activity {
         Button open_list = (Button)findViewById(R.id.btn_open_product_list) ;
         Button inter_zad = (Button)findViewById(R.id.btn_inter_id);
         Button vypocist_dan = (Button)findViewById(R.id.btn_show_dan);
+        CardView sug = (CardView)findViewById(R.id.card_suggestion);
 
         one.setOnClickListener(listener);
         two.setOnClickListener(listener);
@@ -146,6 +151,7 @@ public class MainActivity extends Activity {
         open_list.setOnClickListener(open_list_list);
         inter_zad.setOnClickListener(inter_zad_listener);
         vypocist_dan.setOnClickListener(show_dan_listener);
+        sug.setOnClickListener(sug_add);
 
         //endregion
 
@@ -155,7 +161,7 @@ public class MainActivity extends Activity {
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startScan();
+                CommunicationLayer.getInstance().startScan(MainActivity.this, MainActivity.this);
             }
         });
     }
@@ -223,14 +229,7 @@ public class MainActivity extends Activity {
         //ready to print online receipt
     }
 
-    private void startScan() {
 
-        Intent intent = new Intent(getApplicationContext(),CaptureActivity.class);
-        intent.setAction("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SAVE_HISTORY", false);
-        startActivityForResult(intent, 0);
-
-    }
     public void IncrementKoruny(int amount)
     {
         if (GetKoruny() > 999999) {return;}
@@ -480,6 +479,34 @@ public class MainActivity extends Activity {
 
     //region onclicklisteners
 
+
+    public View.OnClickListener sug_add = new View.OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+            Product add = CommunicationLayer.getInstance().GetProductSugResult();
+            AddItemToUcet(add.cena_koruny, add.cena_halere, add.jmeno_produktu);
+
+
+            Button btn = (Button)findViewById(R.id.btn_multiply);
+            btn.setText("Množství");
+            vynasob_kolika = 1;
+            vynasob_posledni = false;
+
+            halere = 0;
+            koruny = 0;
+            castka = CastMeny.Koruny;
+            TextView monitor = (TextView)findViewById(R.id.txt_castka);
+            monitor.setText(Celkem());
+
+            CardView card = (CardView) findViewById(R.id.card_suggestion);
+            android.support.v4.widget.Space space = (android.support.v4.widget.Space)findViewById(R.id.card_suggestion_space);
+
+            card.setVisibility(View.GONE);
+            space.setVisibility(View.VISIBLE);
+
+        }
+    };
+
     public View.OnClickListener show_dan_listener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -610,6 +637,13 @@ public class MainActivity extends Activity {
                                 }
                                 vynasob_posledni = false;
                                 vynasob_kolika = 1;
+
+                                CardView card = (CardView) findViewById(R.id.card_suggestion);
+                                android.support.v4.widget.Space space = (android.support.v4.widget.Space)findViewById(R.id.card_suggestion_space);
+
+                                card.setVisibility(View.GONE);
+                                space.setVisibility(View.VISIBLE);
+
                                 Button btn = (Button)findViewById(R.id.btn_multiply);
                                 btn.setText("Množství");
                                 TastyToast.makeText(getApplicationContext(), "Objednávka zrušena!", TastyToast.LENGTH_SHORT, TastyToast.INFO);
@@ -655,6 +689,12 @@ public class MainActivity extends Activity {
             btn.setText("Množství");
             vynasob_kolika = 1;
             vynasob_posledni = false;
+
+            CardView card = (CardView) findViewById(R.id.card_suggestion);
+            android.support.v4.widget.Space space = (android.support.v4.widget.Space)findViewById(R.id.card_suggestion_space);
+
+            card.setVisibility(View.GONE);
+            space.setVisibility(View.VISIBLE);
         }
     };
 
@@ -666,12 +706,20 @@ public class MainActivity extends Activity {
             castka = CastMeny.Koruny;
             TextView monitor = (TextView)findViewById(R.id.txt_castka);
             monitor.setText(Celkem());
+
+            CardView card = (CardView) findViewById(R.id.card_suggestion);
+            android.support.v4.widget.Space space = (android.support.v4.widget.Space)findViewById(R.id.card_suggestion_space);
+
+            card.setVisibility(View.GONE);
+            space.setVisibility(View.VISIBLE);
         }
     };
 
     public View.OnClickListener listener = new View.OnClickListener() {
         @Override
         public void onClick(final View view) {
+
+
 
             view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.sucess));
 
@@ -700,12 +748,46 @@ public class MainActivity extends Activity {
 
             TextView monitor = (TextView)findViewById(R.id.txt_castka);
             monitor.setText(Celkem());
+
+            List<Product> sel = Select.from(ProductTable.PRODUCT).where(ProductTable.PRODUCT.INTER_ID.like(koruny+"%")).execute();
+            Logger.e(sel.size() + "počet suggestions");
+            if (!sel.isEmpty())
+            {
+                CommunicationLayer.getInstance().SetProductSugResult(sel.get(0));
+
+                CardView card = (CardView) findViewById(R.id.card_suggestion);
+                android.support.v4.widget.Space space = (android.support.v4.widget.Space)findViewById(R.id.card_suggestion_space);
+
+                TextView jmeno = (TextView)findViewById(R.id.product_name_sug);
+                TextView cenovka = (TextView)findViewById(R.id.product_price_sug);
+
+                jmeno.setText(sel.get(0).inter_id +": " + sel.get(0).jmeno_produktu);
+                cenovka.setText(sel.get(0).cena_koruny+"."+sel.get(0).cena_halere+" Kč");
+
+                card.setVisibility(View.VISIBLE);
+                space.setVisibility(View.GONE);
+            }
+            else
+            {
+                CardView card = (CardView) findViewById(R.id.card_suggestion);
+                android.support.v4.widget.Space space = (android.support.v4.widget.Space)findViewById(R.id.card_suggestion_space);
+
+                card.setVisibility(View.GONE);
+                space.setVisibility(View.VISIBLE);
+            }
+
         }
     };
 
     public View.OnClickListener dot_listener = new View.OnClickListener() {
         @Override
         public void onClick(final View view) {
+
+            CardView card = (CardView) findViewById(R.id.card_suggestion);
+            android.support.v4.widget.Space space = (android.support.v4.widget.Space)findViewById(R.id.card_suggestion_space);
+
+            card.setVisibility(View.GONE);
+            space.setVisibility(View.VISIBLE);
 
             view.setBackgroundColor(CommunicationLayer.getInstance().GetMainActivity().getResources().getColor(R.color.error_color));
 
@@ -749,6 +831,7 @@ public class MainActivity extends Activity {
                 //MyDynamicToast.errorMessage(MainActivity.this, "");
             }
         }
+
     }
 
     @Override
