@@ -1,5 +1,16 @@
 package eet.pospichal.eet;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+
+import com.google.zxing.client.android.CaptureActivity;
+import com.scandit.barcodepicker.BarcodePicker;
+import com.scandit.barcodepicker.OnScanListener;
+import com.scandit.barcodepicker.ScanSession;
+import com.scandit.barcodepicker.ScanSettings;
+import com.scandit.barcodepicker.ScanditLicense;
+import com.scandit.recognition.Barcode;
 import com.siimkinks.sqlitemagic.ProductTable;
 import com.siimkinks.sqlitemagic.Select;
 import com.siimkinks.sqlitemagic.Update;
@@ -23,30 +34,56 @@ public class CommunicationLayer {
 
     private AddProduktActivity add_product_activity;
 
+    private AddCategoryActivity add_category_activity;
+
     private MainActivity main_activity;
+
+    private Product prod;
 
     public void RegisterProductActivity(ProductsActivity activity) {
         this.product_activity = activity;
     }
-
     public void RegisterAddProdActivity(AddProduktActivity activity) {
         this.add_product_activity = activity;
     }
-
     public void RegisterMainActivity(MainActivity main) {
+
         main_activity = main;
     }
-
+    public void RegisterAddCategoryActivity(AddCategoryActivity ac) {
+        this.add_category_activity = ac;
+    }
+    public AddCategoryActivity GetLastRegisteredAddCategoryActivity(){
+        return this.add_category_activity;}
     public ProductsActivity GetLastRegisteredProdActivity() {
+
         return product_activity;
     }
-
     public AddProduktActivity GetLastAddProductActivity() {
+
         return add_product_activity;
     }
-
     public MainActivity GetMainActivity() {
+
         return main_activity;
     }
+    public void SetProductSugResult(Product prod) {
+
+        this.prod = prod;
+    }
+    public Product GetProductSugResult() {
+
+        return this.prod;
+    }
+    public void startScan(Context context, Activity activity, OnScanListener listener) {
+        /*
+        Intent intent = new Intent(context,CaptureActivity.class);
+        intent.setAction("com.google.zxing.client.android.SCAN");
+        intent.putExtra("SAVE_HISTORY", false);
+        activity.startActivityForResult(intent, 0);
+        */
+    }
+
+
 
 }

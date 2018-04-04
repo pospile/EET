@@ -16,21 +16,27 @@ import com.klinker.android.sliding.SlidingActivity;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.mancj.materialsearchbar.MaterialSearchBar.OnSearchActionListener;
 import com.mindorks.placeholderview.PlaceHolderView;
+import com.orhanobut.logger.Logger;
+import com.siimkinks.sqlitemagic.CategoryTable;
 import com.siimkinks.sqlitemagic.Select;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import eet.pospichal.eet.model.Category;
 import eet.pospichal.eet.model.Product;
 import com.siimkinks.sqlitemagic.ProductTable;
 
 
 public class ProductsActivity extends SlidingActivity {
 
-    PlaceHolderView mrdkaView;
+    PlaceHolderView productView;
+    PlaceHolderView categoryView;
     Button add_new_produkt;
+    Button add_new_category;
     MaterialSearchBar bar;
     List<Product> produkt;
+    List<Category> kategorie;
 
     @Override
     public void init(Bundle savedInstanceState) {
@@ -42,6 +48,7 @@ public class ProductsActivity extends SlidingActivity {
         disableHeader();
         enableFullscreen();
 
+
         setPrimaryColors(
                 getResources().getColor(R.color.cardview_dark_background),
                 getResources().getColor(R.color.black)
@@ -50,17 +57,24 @@ public class ProductsActivity extends SlidingActivity {
         setContent(R.layout.activity_products);
 
         produkt = new ArrayList<Product>();
+        kategorie = new ArrayList<Category>();
 
         bar = (MaterialSearchBar)findViewById(R.id.searchBar);
-        mrdkaView = (PlaceHolderView)findViewById(R.id.mrdkaView);
-        mrdkaView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 4));
-        mrdkaView.getBuilder().setHasFixedSize(true);
+        productView = (PlaceHolderView)findViewById(R.id.mrdkaView);
+        productView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 4));
+        productView.getBuilder().setHasFixedSize(true);
+
+        categoryView = (PlaceHolderView)findViewById(R.id.categoryView);
+        categoryView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 1));
+        categoryView.getBuilder().setHasFixedSize(true);
 
         add_new_produkt = (Button)findViewById(R.id.btn_add_produkt);
+        add_new_category = (Button)findViewById(R.id.btn_add_cat);
 
 
 
         add_new_produkt.setOnClickListener(addProd);
+        add_new_category.setOnClickListener(addCat);
         bar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -73,7 +87,7 @@ public class ProductsActivity extends SlidingActivity {
                 for (int j = produkt.size()-1; j >= 0; j--)
                 {
                     produkt.remove(j);
-                    mrdkaView.removeView(j);
+                    productView.removeView(j);
                 }
 
                 if (charSequence.toString() == "")
@@ -81,7 +95,7 @@ public class ProductsActivity extends SlidingActivity {
                     for (int j = produkt.size()-1; j >= 0; j--)
                     {
                         produkt.remove(j);
-                        mrdkaView.removeView(j);
+                        productView.removeView(j);
                     }
                     List<Product> select = Select.from(ProductTable.PRODUCT).limit(100).execute();
 
@@ -91,15 +105,15 @@ public class ProductsActivity extends SlidingActivity {
                     for (Product prod :
                             select) {
                         Log.e("INFO", prod.jmeno_produktu);
-                        ProduktType new_prod = new ProduktType(getApplicationContext(), mrdkaView, index++, prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
+                        ProduktType new_prod = new ProduktType(getApplicationContext(), productView, index++, prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
                         produkt.add(prod);
-                        mrdkaView.addView(new_prod);
+                        productView.addView(new_prod);
                     }
                 }
                 else
                 {
                     /*
-                    View view = ProductsActivity.this.mrdkaView;
+                    View view = ProductsActivity.this.productView;
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     */
@@ -112,9 +126,9 @@ public class ProductsActivity extends SlidingActivity {
                     for (Product prod :
                             select) {
                         Log.e("INFO", prod.jmeno_produktu);
-                        ProduktType new_prod = new ProduktType(getApplicationContext(), mrdkaView, index++, prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
+                        ProduktType new_prod = new ProduktType(getApplicationContext(), productView, index++, prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
                         produkt.add(prod);
-                        mrdkaView.addView(new_prod);
+                        productView.addView(new_prod);
                     }
                 }
             }
@@ -131,14 +145,14 @@ public class ProductsActivity extends SlidingActivity {
                 for (int i = produkt.size()-1; i >= 0; i--)
                 {
                     produkt.remove(i);
-                    mrdkaView.removeView(i);
+                    productView.removeView(i);
                 }
 
             }
 
             @Override
             public void onSearchConfirmed(CharSequence charSequence) {
-                View view = ProductsActivity.this.mrdkaView;
+                View view = ProductsActivity.this.productView;
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
@@ -153,9 +167,9 @@ public class ProductsActivity extends SlidingActivity {
         });
 
         /*
-        ProduktType new_prod = new ProduktType(getApplicationContext(), mrdkaView, 0, "Produkt 1");
-        mrdkaView.addView(new_prod);
-        mrdkaView.addView(new ProduktType(getApplicationContext(), mrdkaView, 1, "Produkt 2"));
+        ProduktType new_prod = new ProduktType(getApplicationContext(), productView, 0, "Produkt 1");
+        productView.addView(new_prod);
+        productView.addView(new ProduktType(getApplicationContext(), productView, 1, "Produkt 2"));
         */
 
         List<Product> select = Select.from(ProductTable.PRODUCT).limit(100).execute();
@@ -164,8 +178,19 @@ public class ProductsActivity extends SlidingActivity {
                 select) {
             Log.e("INFO", prod.jmeno_produktu);
             produkt.add(prod);
-            ProduktType new_prod = new ProduktType(getApplicationContext(), mrdkaView, produkt.size(), prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
-            mrdkaView.addView(new_prod);
+            ProduktType new_prod = new ProduktType(getApplicationContext(), productView, produkt.size(), prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
+            productView.addView(new_prod);
+        }
+
+
+        List<Category> categories = Select.from(CategoryTable.CATEGORY).execute();
+
+        for (Category cat:
+             categories) {
+            Logger.i("Category:" + cat.jmeno);
+            kategorie.add(cat);
+            CategoryType catN = new CategoryType(getApplicationContext(), categoryView, kategorie.size(), cat.jmeno);
+            categoryView.addView(catN);
         }
 
     }
@@ -185,11 +210,24 @@ public class ProductsActivity extends SlidingActivity {
         }
     };
 
-    public void RefreshFeed(){
-        for (int j = produkt.size()-1; j >= 0; j--)
+    View.OnClickListener addCat = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getApplicationContext(), AddCategoryActivity.class);
+            //intent.putExtra("View", );
+            startActivity(intent);
+        }
+    };
+
+
+    public void RefreshProductList(){
+        if (!produkt.isEmpty())
         {
-            produkt.remove(j);
-            mrdkaView.removeView(j);
+            for (int j = produkt.size()-1; j >= 0; j--)
+            {
+                produkt.remove(j);
+                productView.removeView(j);
+            }
         }
         List<Product> select = Select.from(ProductTable.PRODUCT).limit(100).execute();
 
@@ -199,9 +237,63 @@ public class ProductsActivity extends SlidingActivity {
         for (Product prod :
                 select) {
             Log.e("INFO", prod.jmeno_produktu);
-            ProduktType new_prod = new ProduktType(getApplicationContext(), mrdkaView, index++, prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
+            ProduktType new_prod = new ProduktType(getApplicationContext(), productView, index++, prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
             produkt.add(prod);
-            mrdkaView.addView(new_prod);
+            productView.addView(new_prod);
+        }
+        enableFullscreen();
+    }
+    public void RefreshProductToCategory(String category){
+
+        Logger.e("Looking for category: " + category);
+
+        if (!produkt.isEmpty())
+        {
+            for (int j = produkt.size()-1; j >= 0; j--)
+            {
+                produkt.remove(j);
+                productView.removeView(j);
+            }
+        }
+
+        int cat_id = (int)Select.from(CategoryTable.CATEGORY).where(CategoryTable.CATEGORY.JMENO.is(category)).execute().get(0).id;
+        Logger.e("Category id: " + cat_id);
+        List<Product> select = Select.from(ProductTable.PRODUCT).where(ProductTable.PRODUCT.CATEGORY.is(cat_id)).limit(100).execute();
+
+        Log.e("SELECT", select.size()+" velikost");
+
+        int index = 0;
+        for (Product prod :
+                select) {
+            Log.e("INFO", prod.jmeno_produktu);
+            ProduktType new_prod = new ProduktType(getApplicationContext(), productView, index++, prod.jmeno_produktu, prod.cena_koruny+"."+prod.cena_halere+" Kč", prod.cena_koruny, prod.cena_halere);
+            produkt.add(prod);
+            productView.addView(new_prod);
         }
     }
+    public void RefreshCategoryList(){
+        if(!kategorie.isEmpty())
+        {
+            Logger.e("Pocet kategorii -> " + kategorie.size());
+            for (int j = kategorie.size()-1; j >= 0; j--)
+            {
+                kategorie.remove(j);
+                categoryView.removeView(j);
+            }
+        }
+
+        List<Category> select = Select.from(CategoryTable.CATEGORY).limit(100).execute();
+
+        //Log.e("SELECT", select.size()+" velikost");
+
+        int index = 0;
+        for (Category prod :
+                select) {
+            Log.e("INFO", prod.jmeno);
+            CategoryType new_prod = new CategoryType(getApplicationContext(), productView, index++, prod.jmeno);
+            kategorie.add(prod);
+            categoryView.addView(new_prod);
+        }
+    }
+
 }

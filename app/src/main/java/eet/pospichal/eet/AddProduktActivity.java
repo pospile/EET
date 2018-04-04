@@ -1,23 +1,26 @@
 package eet.pospichal.eet;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.klinker.android.sliding.MultiShrinkScroller;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.klinker.android.sliding.SlidingActivity;
-import com.mindorks.placeholderview.PlaceHolderView;
+import com.orhanobut.logger.Logger;
 import com.sdsmdg.tastytoast.TastyToast;
+import com.siimkinks.sqlitemagic.CategoryTable;
+import com.siimkinks.sqlitemagic.Select;
+
+import java.util.List;
+
+import eet.pospichal.eet.model.Category;
 
 
 public class AddProduktActivity extends SlidingActivity {
 
     Button addProdukt;
+    String sel_cat = "";
 
     @Override
     public void init(Bundle savedInstanceState) {
@@ -36,6 +39,33 @@ public class AddProduktActivity extends SlidingActivity {
 
         addProdukt = (Button)findViewById(R.id.btn_add_produkt_to_list);
         addProdukt.setOnClickListener(add_prd_to_dat);
+        Button caa = (Button)findViewById(R.id.btn_select_cat);
+
+        caa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final List<Category> cat =  Select.from(CategoryTable.CATEGORY).execute();
+                final String[] pole = new String[cat.size()];
+                int i = 0;
+                for (Category ct :
+                        cat) {
+                    pole[i] = ct.jmeno;
+                    i++;
+                }
+                new MaterialDialog.Builder(AddProduktActivity.this)
+                        .title("Vyberte kategorii")
+                        .items(pole)
+                        .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                            @Override
+                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                sel_cat = pole[which];
+                                return true;
+                            }
+                        })
+                        .positiveText("Vybráno")
+                        .show();
+            }
+        });
 
     }
 
@@ -81,11 +111,19 @@ public class AddProduktActivity extends SlidingActivity {
             EditText barcode = (EditText)findViewById(R.id.editProductBarcode);
             String barStr =barcode.getText().toString();
 
+
+
             if (!nameStr.isEmpty() && (korunyStr != 0 || halereStr != 0))
             {
-                DatabaseHelper.getInstance().AddProduktToDatabase(nameStr, korunyStr , halereStr, 21, idStr, barStr);
+                int cat_id = -1;
+                if (!sel_cat.isEmpty())
+                {
+                    cat_id = (int) Select.from(CategoryTable.CATEGORY).where(CategoryTable.CATEGORY.JMENO.is(sel_cat)).execute().get(0).id;
+                    Logger.e("Creating product in category:" + cat_id);
+                }
+                DatabaseHelper.getInstance().AddProduktToDatabase(nameStr, korunyStr , halereStr, 21, idStr, barStr, cat_id);
                 TastyToast.makeText(AddProduktActivity.this, "Produkt " + nameStr + " úspěšně vytvořen!", TastyToast.LENGTH_SHORT, TastyToast.SUCCESS);
-                CommunicationLayer.getInstance().GetLastRegisteredProdActivity().RefreshFeed();
+                CommunicationLayer.getInstance().GetLastRegisteredProdActivity().RefreshProductList();
                 AddProduktActivity.this.finish();
             }
             else
