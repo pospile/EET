@@ -55,7 +55,7 @@ dependencies {
 
 
     //THIS SECTION IS FOR NEW BARCODE SCANNER IMPLEMENTATION
-    compile files('libs/scandit.jar')
+    //compile files('libs/scandit.jar')
 
 
 

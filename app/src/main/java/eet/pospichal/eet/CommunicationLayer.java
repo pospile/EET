@@ -5,6 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.google.zxing.client.android.CaptureActivity;
+import com.scandit.barcodepicker.BarcodePicker;
+import com.scandit.barcodepicker.OnScanListener;
+import com.scandit.barcodepicker.ScanSession;
+import com.scandit.barcodepicker.ScanSettings;
+import com.scandit.barcodepicker.ScanditLicense;
+import com.scandit.recognition.Barcode;
 import com.siimkinks.sqlitemagic.ProductTable;
 import com.siimkinks.sqlitemagic.Select;
 import com.siimkinks.sqlitemagic.Update;
@@ -69,12 +75,15 @@ public class CommunicationLayer {
 
         return this.prod;
     }
-    public void startScan(Context context, Activity activity) {
-
+    public void startScan(Context context, Activity activity, OnScanListener listener) {
+        /*
         Intent intent = new Intent(context,CaptureActivity.class);
         intent.setAction("com.google.zxing.client.android.SCAN");
         intent.putExtra("SAVE_HISTORY", false);
         activity.startActivityForResult(intent, 0);
+        */
     }
+
+
 
 }

@@ -25,6 +25,12 @@ import com.desai.vatsal.mydynamictoast.MyDynamicToast;
 import com.google.zxing.client.android.CaptureActivity;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.orhanobut.logger.Logger;
+import com.scandit.barcodepicker.BarcodePicker;
+import com.scandit.barcodepicker.OnScanListener;
+import com.scandit.barcodepicker.ScanSession;
+import com.scandit.barcodepicker.ScanSettings;
+import com.scandit.barcodepicker.ScanditLicense;
+import com.scandit.recognition.Barcode;
 import com.sdsmdg.tastytoast.TastyToast;
 import com.siimkinks.sqlitemagic.ProductTable;
 import com.siimkinks.sqlitemagic.Select;
@@ -50,7 +56,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static openeet.lite.EetRegisterRequest.loadStream;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnScanListener {
 
     //region properties
     public int koruny;
@@ -59,6 +65,7 @@ public class MainActivity extends Activity {
 
     public int celk_kor;
     public int celk_hal;
+
 
     public enum CastMeny
     {
@@ -81,6 +88,7 @@ public class MainActivity extends Activity {
 
 
     private boolean zadani_inter = false;
+    private BarcodePicker mPicker;
 
     //endregion
 
@@ -156,14 +164,37 @@ public class MainActivity extends Activity {
         //endregion
 
 
+        ScanditLicense.setAppKey("PD+YwAUaXdmmhc3Eljfp2PeHXTYpuBwZMtlCNm9YkxA");
+        ScanSettings settings = ScanSettings.create();
+        settings.setSymbologyEnabled(Barcode.SYMBOLOGY_EAN13, true);
+        settings.setSymbologyEnabled(Barcode.SYMBOLOGY_UPCA, true);
+        /*
+        // Instantiate the barcode picker by using the settings defined above.
+        BarcodePicker picker = new BarcodePicker(this, settings);
+        // Set the on scan listener to receive barcode scan events.
+        picker.setOnScanListener(scan_list);
+        setContentView(picker);
+        */
 
-        Button scan = (Button)findViewById(R.id.btn_scan);
-        scan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CommunicationLayer.getInstance().startScan(MainActivity.this, MainActivity.this);
-            }
-        });
+//
+//        Button scan = (Button)findViewById(R.id.btn_scan);
+//        scan.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                CommunicationLayer.getInstance().startScan(MainActivity.this, MainActivity.this, scan_list);
+//            }
+//        });
+
+    }
+    @Override
+    protected void onResume() {
+        //mPicker.startScanning();
+        super.onResume();
+    }
+    @Override
+    protected void onPause() {
+        //mPicker.stopScanning();
+        super.onPause();
     }
 
     //region metody
@@ -839,5 +870,17 @@ public class MainActivity extends Activity {
         // ignore orientation/keyboard change
         super.onConfigurationChanged(newConfig);
     }
+
+    @Override
+    public void didScan(ScanSession scanSession) {
+
+    }
+
+    public OnScanListener scan_list = new OnScanListener() {
+        @Override
+        public void didScan(ScanSession scanSession) {
+
+        }
+    };
     //endregion
 }

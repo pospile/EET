@@ -28,5 +28,6 @@ public class Product {
     public int inter_id;
 
     public String barcode;
-}
 
+    public int category;
+}
